@@ -16,7 +16,7 @@ public class LcdOutput extends Thread{
 	LcdDisplay lcd = LcdDisplay.getInstance();
 	ControlBroker control = ControlBroker.getInstance();
 	
-	boolean RnD = true ; //TODO Set to true for extra logging and faster testing, disable upon release
+	boolean RnD = false;
 	boolean hBoost = false;
 	boolean wBoost = false;
 	boolean heating = false;
@@ -26,7 +26,7 @@ public class LcdOutput extends Thread{
 	int lastScreenMode = 0;
 	int multiScreenStep = 1000; // This defines how fast the screens interchange in multiscreen mode. The actual delay is the twice this number
 	int screenQuery = 0;
-	int LCDRefreshDelay = 1000; //TODO: This controls how responsive is the LCD. Need to adjust for production
+	int LCDRefreshDelay = 1000; // This controls how responsive is the LCD
 	
 	public void run() {
 		String line1 = "";
@@ -43,7 +43,7 @@ public class LcdOutput extends Thread{
 		line1 = "";
 		line2 = "";
 		try {
-			if (RnD) //TODO 
+			if (RnD)
 				Thread.sleep(1000);
 			else
 				Thread.sleep(5000);
