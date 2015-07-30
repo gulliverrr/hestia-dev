@@ -17,12 +17,16 @@ import uk.co.jaynne.datasource.interfaces.ConfigSource;
  */
 public class BoilerControl {
 
-	public static void main(String[] args) {
-		
+	public static void main(String[] args) {	  
 		ConfigSource config = new ConfigSqlSource();
+		HestiaMQTTClient MyMQTTClient = HestiaMQTTClient.getInstance();
+    MyMQTTClient.MqttInit();
 		//The scheduler thread deals with checking whether any channels are due to come on
 		Thread scheduler = new Thread(new Scheduler());
 		scheduler.start();
+
+		//MqttSend("hestia/temperature0/current", Double.toString(control.getcurrent_temp()));
+		
 		
 		boolean pinsHigh = false; //pins are default low
 		//Get the configured pins value
@@ -84,6 +88,8 @@ public class BoilerControl {
 			socketServer.join();
 			System.out.println("Stopping lcd output");
 			lcd.interrupt();
+			System.out.println("Stopping MQTT client");
+			MyMQTTClient.MqttCleanup();
 			while (lcd.isAlive()) {
 				lcd.join(500);
 				if (lcd.isAlive()) {

@@ -272,33 +272,6 @@ cal.add(Calendar.MINUTE, (-offsetMins));
 		
 		return remainingLine1;
 	}
-
-/**	
-	 double readtemperature() {
-		    String s;
-		    Process p;
-		    int itemp_c;
-		    double temp_c;
-		    double temp_f;
-		    double retVal = 0;
-		    
-		    try {
-		    	p = Runtime.getRuntime().exec("/opt/boilercontrol/scripts/gettemperature.sh");
-		        BufferedReader br = new BufferedReader(
-		            new InputStreamReader(p.getInputStream()));
-		        while ((s = br.readLine()) != null) {
-		        	itemp_c = Integer.parseInt(s);
-		        	temp_c = ((double) itemp_c)/1000.0;
-		        	temp_f = (temp_c*9/5)+32;
-					retVal = temp_c;
-		        }
-		        p.waitFor();
-		        //System.out.println ("exit: " + p.exitValue());
-		        p.destroy();
-		    } catch (Exception e) {System.out.println(e);}
-		    return retVal;
-		}
-/**/
 	 
 	 	String getwlan0ip() {
 		    String s;
