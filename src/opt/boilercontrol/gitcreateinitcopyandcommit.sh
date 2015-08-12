@@ -9,9 +9,9 @@ if [ $# -eq 0 ]
   else
     mkdir /home/pi/git;
     cd /home/pi/git;
-    rm -rf hestia-dev;
-    mkdir hestia-dev;
-    cd hestia-dev;
+    rm -rf hestia-engine-dev;
+    mkdir hestia-engine-dev;
+    cd hestia-engine-dev;
     git init;
     git remote add origin https://github.com/gulliverrr/hestia-engine-dev.git;
     git pull origin master;
