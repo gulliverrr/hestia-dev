@@ -15,17 +15,14 @@ import uk.co.jaynne.gpio.GpioPin;
 import java.text.*; //DecimalFormat
 
   public class ControlBroker {
-    //public static GpioPin RELAY1 = GpioPin.PIN8_GPIO14; // water //Replaced for UART boot issue
-    public static GpioPin RELAY1 = GpioPin.PIN16_GPIO23; // water
-    //public static GpioPin RELAY2 = GpioPin.PIN10_GPIO15; // heating //Replaced for UART boot issue
-    public static GpioPin RELAY2 = GpioPin.PIN12_GPIO18; // heating
-    public static GpioPin RELAY3 = GpioPin.PIN21_GPIO9; // backlight
+    public static GpioPin RELAY1 = GpioPin.PIN16_GPIO23;  // water
+    public static GpioPin RELAY2 = GpioPin.PIN12_GPIO18;  // heating
+    public static GpioPin RELAY3 = GpioPin.PIN21_GPIO9;   // backlight
     
-    public static GpioPin SWITCH1 =  GpioPin.PIN26_GPIO7; // boost water
-    public static GpioPin SWITCH2 =  GpioPin.PIN18_GPIO24; // boost heating
-    public static GpioPin SWITCH3 =  GpioPin.PIN15_GPIO22; // +
-    public static GpioPin SWITCH4 =  GpioPin.PIN11_GPIO17; // -
-    //public static GpioPin SWITCH4 = GpioPin.PIN21_GPIO9; // -
+    public static GpioPin SWITCH1 =  GpioPin.PIN26_GPIO7;   // boost water
+    public static GpioPin SWITCH2 =  GpioPin.PIN18_GPIO24;  // boost heating
+    public static GpioPin SWITCH3 =  GpioPin.PIN15_GPIO22;  // +
+    public static GpioPin SWITCH4 =  GpioPin.PIN11_GPIO17;  // -
     //DO NOT USE PIN23_GPIO11
     
     private static boolean RELAY_ON = false;
@@ -48,7 +45,7 @@ import java.text.*; //DecimalFormat
     private long waterBoostOffTime = 0;
     private boolean backlightOn = false;
     private GpioControl gpio;
-    private HestiaMQTTClient MyMQTTClient;
+    //private HestiaMQTTClient MyMQTTClient;
     
     public double current_temp;
     public double current_temp_reading;
@@ -64,12 +61,28 @@ import java.text.*; //DecimalFormat
     private ControlBroker() {
     gpio = GpioControlFramboos.getInstance();
     config = new ConfigSqlSource();
-    MyMQTTClient = HestiaMQTTClient.getInstance();
+    //MyMQTTClient = HestiaMQTTClient.getInstance();
+    //MQTTClient
+//    Thread MyMQTTClient = new Thread(new HestiaMQTTClient());
+//    MyMQTTClient.start();
+    
+    //MyMQTTClient = new HestiaMQTTClient();
+    //Thread threadMQTT = new Thread(MyMQTTClient);
+    //threadMQTT.start();
+
     
     //Start with water and heating off in case they have been left in an improper state
     deactivateHeating();
     deactivateWater();
     turnBacklightOn();
+  }
+  
+  private static class SingletonHolder { 
+    public static final ControlBroker INSTANCE = new ControlBroker();
+  }
+
+  public static ControlBroker getInstance() {
+    return SingletonHolder.INSTANCE;
   }
   
   public GpioControl getGpio() {
@@ -94,7 +107,7 @@ import java.text.*; //DecimalFormat
     gpio.setValue(RELAY2, RELAY_ON);
     heatingOn = true;
     System.out.println("H:ON");
-    MyMQTTClient.MqttSend("hestia/heating0/IN/ON", "ON");
+    //MyMQTTClient.MqttSend("hestia/heating0/state", "ON");
     return true;
   }
   
@@ -113,7 +126,7 @@ import java.text.*; //DecimalFormat
     gpio.setValue(RELAY2, RELAY_OFF);
     heatingOn = false;
     System.out.println("H:OFF");
-    MyMQTTClient.MqttSend("hestia/heating0/IN/OFF", "OFF");
+    //MyMQTTClient.MqttSend("hestia/heating0/state", "OFF");
     return true;
   }
   
@@ -133,7 +146,7 @@ import java.text.*; //DecimalFormat
     gpio.setValue(RELAY1, RELAY_ON);
     waterOn = true;
     System.out.println("W:ON");
-    MyMQTTClient.MqttSend("hestia/water0/IN/ON", "ON");
+    //MyMQTTClient.MqttSend("hestia/water0/state", "ON");
     return true;
   }
   
@@ -151,7 +164,7 @@ import java.text.*; //DecimalFormat
     gpio.setValue(RELAY1, RELAY_OFF);
     waterOn = false;
     System.out.println("W:OFF");
-    MyMQTTClient.MqttSend("hestia/water0/IN/OFF", "OFF");
+    //MyMQTTClient.MqttSend("hestia/water0/state", "OFF");
     return true;
   }
   
@@ -581,24 +594,4 @@ import java.text.*; //DecimalFormat
     gpio.close(RELAY2);
     gpio.close(RELAY3);
   }
-  
-  private static class SingletonHolder { 
-    public static final ControlBroker INSTANCE = new ControlBroker();
-  }
-
-  public static ControlBroker getInstance() {
-    return SingletonHolder.INSTANCE;
-  }
-
-  public boolean testw() {
-    System.out.println("testw() called");
-    return true;
-  }
-  
-  public boolean testh() {
-    System.out.println("testh() called");
-    return true;
-  }
-
-
 }

@@ -10,7 +10,7 @@ import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 
-public class HestiaMQTTClient implements MqttCallback {
+public class HestiaMQTTClient extends Thread implements MqttCallback {
 
   static MqttClient myClient;
   MqttConnectOptions connOpt;
@@ -23,6 +23,7 @@ public class HestiaMQTTClient implements MqttCallback {
   // the following two flags control whether this example is a publisher, a subscriber or both
   static final Boolean subscriber = true;
   static final Boolean publisher = false;
+  static   ControlBroker control;
 
   /**
    * 
@@ -45,7 +46,8 @@ public class HestiaMQTTClient implements MqttCallback {
    */
   @Override
   public void deliveryComplete(IMqttDeliveryToken token) {
-      // TODO Auto-generated method stub
+    System.out.println("MQTT delivery complete!");
+    // TODO Auto-generated method stub
   }
   /**
    * 
@@ -55,35 +57,35 @@ public class HestiaMQTTClient implements MqttCallback {
    */
   @Override
   public void messageArrived(String topic, MqttMessage message) throws Exception {
-    ControlBroker control = ControlBroker.getInstance();
-    //System.out.println("MQTT: " + topic + ": " + new String(message.getPayload()) + ".");
+    //control = ControlBroker.getInstance();
+    System.out.println("MQTT Received Topic: " + topic + ", Payload: " + new String(message.getPayload()) + ".");
   
-    if (topic.equals("hestia/heating0/OUT") && new String(message.getPayload()).equals("ON"))
+    if (topic.equals("hestia/heating0") && new String(message.getPayload()).equals("1"))
     {
       System.out.println("MQTT received: " + topic);
-      control.turnHeatingOn();
-      //control.toggleHeatingBoostStatus();
+      //control.turnHeatingOn();
+      control.toggleHeatingBoostStatus();
       //control.testh();
       //System.out.println("MQTT called control.toggleHeatingBoostStatus()");
-    } else if (topic.equals("hestia/heating0/OUT") && new String(message.getPayload()).equals("OFF"))
+    } else if (topic.equals("hestia/heating0") && new String(message.getPayload()).equals("0"))
     {
       System.out.println("MQTT received: " + topic);
-      control.turnHeatingOff();
-      //control.toggleHeatingBoostStatus();
+      //control.turnHeatingOff();
+      control.toggleHeatingBoostStatus();
       //control.testh();
       //System.out.println("MQTT called control.toggleHeatingBoostStatus()");
-    } else if (topic.equals("hestia/water0/OUT") && new String(message.getPayload()).equals("ON"))
+    } else if (topic.equals("hestia/water0") && new String(message.getPayload()).equals("1"))
     {
       System.out.println("MQTT received: " + topic);
-      control.turnWaterOn();
-      //control.toggleWaterBoostStatus();
+      //control.turnWaterOn();
+      control.toggleWaterBoostStatus();
       //control.testw();
       //System.out.println("MQTT called control.toggleWaterBoostStatus()"); 
-    } else if (topic.equals("hestia/water0/OUT") && new String(message.getPayload()).equals("OFF"))
+    } else if (topic.equals("hestia/water0") && new String(message.getPayload()).equals("0"))
     {
       System.out.println("MQTT received: " + topic);
-      control.turnWaterOff();
-      //control.toggleWaterBoostStatus();
+      //control.turnWaterOff();
+      control.toggleWaterBoostStatus();
       //control.testw();
       //System.out.println("MQTT called control.toggleWaterBoostStatus()"); 
     }
@@ -122,8 +124,10 @@ public class HestiaMQTTClient implements MqttCallback {
   /**/
   
   public void MqttCleanup() {
+    System.out.println("MqttCleanup(): Starting...");
     try {
       myClient.disconnect();
+      System.out.println("MqttCleanup(): Completed!");
     } catch (MqttException mqtte) {
         System.out.println("MqttException caught on disconnect");
     }
@@ -134,9 +138,22 @@ public class HestiaMQTTClient implements MqttCallback {
    * MAIN
    * 
    */
+  /**
   public static void main(String[] args) {
     HestiaMQTTClient hmc = new HestiaMQTTClient();
+    //control = ControlBroker.getInstance();
     //hmc.MqttInit();
+  }
+  /**/
+  
+  public void run() {
+    HestiaMQTTClient hmc = new HestiaMQTTClient();
+    hmc.MqttInit();
+    control = ControlBroker.getInstance();
+    while (!Thread.interrupted()) {
+      //do something
+    }
+    //hmc.MqttCleanup();
   }
   
   /**
@@ -162,17 +179,17 @@ public class HestiaMQTTClient implements MqttCallback {
       myClient.connect(connOpt);
     } catch (MqttException e) {
       e.printStackTrace();
-      System.exit(-1);
+      //System.exit(-1);
     }
     
     System.out.println("MQTT - Connected to: " + BROKER_URL);
 
     try {
       int subQoS = 0;
-      myClient.subscribe("hestia/heating0/OUT/ON", subQoS);
-      myClient.subscribe("hestia/heating0/OUT/OFF", subQoS);
-      myClient.subscribe("hestia/water0/OUT/ON", subQoS);
-      myClient.subscribe("hestia/water0/OUT/OFF", subQoS);
+      myClient.subscribe("hestia/heating0", subQoS);
+      //myClient.subscribe("hestia/heating0/OUT", subQoS);
+      myClient.subscribe("hestia/water0", subQoS);
+      //myClient.subscribe("hestia/water0/OUT", subQoS);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -186,4 +203,5 @@ public class HestiaMQTTClient implements MqttCallback {
     return SingletonHolder.INSTANCE;
   }
 }
+
 

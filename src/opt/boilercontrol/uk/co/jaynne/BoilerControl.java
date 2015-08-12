@@ -19,8 +19,8 @@ public class BoilerControl {
 
 	public static void main(String[] args) {	  
 		ConfigSource config = new ConfigSqlSource();
-		HestiaMQTTClient MyMQTTClient = HestiaMQTTClient.getInstance();
-    MyMQTTClient.MqttInit();
+		//HestiaMQTTClient MyMQTTClient = HestiaMQTTClient.getInstance();
+    //MyMQTTClient.MqttInit();
 		//The scheduler thread deals with checking whether any channels are due to come on
 		Thread scheduler = new Thread(new Scheduler());
 		scheduler.start();
@@ -48,6 +48,19 @@ public class BoilerControl {
 		//Socket server
 		Thread socketServer = new Thread(new SocketServer());
 		socketServer.start();
+		
+		//MQTTClient
+    //Thread MyMQTTClient = new Thread(new HestiaMQTTClient());
+    //MyMQTTClient.start();
+    
+		HestiaMQTTClient MyMQTTClient = new HestiaMQTTClient();
+    Thread threadMQTT = new Thread(MyMQTTClient);
+    threadMQTT.start();
+    
+    HestiaMQTTClient MyMQTTClient2 = new HestiaMQTTClient();
+    Thread threadMQTT2 = new Thread(MyMQTTClient2);
+    threadMQTT2.start();
+
 		//LCD output
 		Thread lcd = new Thread(new LcdOutput());
 		lcd.start();
@@ -86,17 +99,39 @@ public class BoilerControl {
 			System.out.println("Stopping socket server");
 			socketServer.interrupt();
 			socketServer.join();
-			System.out.println("Stopping lcd output");
-			lcd.interrupt();
+			
 			System.out.println("Stopping MQTT client");
-			MyMQTTClient.MqttCleanup();
+      MyMQTTClient.MqttCleanup();
+			threadMQTT.interrupt();
+      while (threadMQTT.isAlive()) {
+        threadMQTT.join(500);
+        if (threadMQTT.isAlive()) {
+          System.out.println(" Stubborn MQTT thread, trying again");
+          threadMQTT.interrupt();
+        }
+      }
+      
+      System.out.println("Stopping MQTT2 client");
+      MyMQTTClient2.MqttCleanup();
+      threadMQTT2.interrupt();
+      while (threadMQTT2.isAlive()) {
+        threadMQTT2.join(500);
+        if (threadMQTT2.isAlive()) {
+          System.out.println(" Stubborn MQTT2 thread, trying again");
+          threadMQTT2.interrupt();
+        }
+      }
+      
+      System.out.println("Stopping LCD output");
+			lcd.interrupt();
 			while (lcd.isAlive()) {
 				lcd.join(500);
 				if (lcd.isAlive()) {
-					System.out.println("Stubourn thread, trying again");
+					System.out.println(" Stubborn LCD thread, trying again");
 					lcd.interrupt();
 				}
 			}
+			
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
