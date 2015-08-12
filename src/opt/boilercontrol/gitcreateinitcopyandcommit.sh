@@ -13,7 +13,7 @@ if [ $# -eq 0 ]
     mkdir hestia-dev;
     cd hestia-dev;
     git init;
-    git remote add origin https://github.com/gulliverrr/hestia-dev.git;
+    git remote add origin https://github.com/gulliverrr/hestia-engine-dev.git;
     git pull origin master;
     sudo cp -r /opt/boilercontrol/* src/opt/boilercontrol/;
     sudo find . -name "*.class" -exec rm -rf {} \;
